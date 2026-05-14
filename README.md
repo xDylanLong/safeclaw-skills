@@ -1,19 +1,55 @@
 # SafeClaw Browser Use Skill
 
-一个给 Codex / SafeClaw 使用的浏览器自动化 skill。
+我们是 SnapSnap 团队，正在开发一个 AI 浏览器自动化产品 SafeClaw。
 
-它基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 打包，重点增强了真实 Chrome 的 profile 选择流程：在执行浏览器任务前，先识别本机 Chrome profiles，让用户明确选择要接管哪个 profile，再用这个 profile 继续完成网页打开、截图、点击、表单填写和页面检查。
+在开发过程中，我们大量使用了 [browser-use/browser-harness](https://github.com/browser-use/browser-harness)。它可以接管真实 Chrome，复用登录态，并完成截图、点击、输入和页面检查，是一个非常实用的底层能力。
+
+但我们发现一个实际问题：当用户本机有多个 Chrome profile 时，agent 很容易接管错账号，或者不清楚当前自动化到底运行在哪个 profile 里。
+
+所以我们做了这个 skill：`safeclaw-browser-use`。
+
+它基于 Browser Harness 打包，并强化了 Chrome profile 选择流程。每次执行浏览器任务前，skill 会先识别本机 Chrome profiles，让用户明确选择要接管哪个 profile，然后后续所有浏览器操作都绑定到这个 profile 上。
+
+我们把这套能力整理成 Codex / SafeClaw 可安装的 skill，并开放出来给大家免费非商用使用。
+
+## 它是什么
+
+`safeclaw-browser-use` 是一个浏览器自动化 skill，用来让 agent 使用用户真实 Chrome 环境完成网页任务。
+
+它可以做：
+
+- 打开真实 Chrome
+- 复用已登录账号
+- 选择指定 Chrome profile
+- 打开网页
+- 截图
+- 点击、输入、提交表单
+- 检查页面信息
+
+## 相比 Browser Harness 增强了什么
+
+Browser Harness 提供的是底层真实浏览器接管能力。
+
+这个 skill 在它之上增加了一层更适合 agent 使用的工作流：
+
+- 启动前先检测本机 Chrome profiles
+- 让用户明确选择目标 profile
+- 后续任务绑定到这个 profile
+- 避免误用默认账号或其他账号
+- 内置 macOS arm64 / Windows x64 运行时，降低安装门槛
+
+核心改进可以概括为一句话：
+
+> Browser Harness 负责接管真实 Chrome；`safeclaw-browser-use` 负责让接管过程更明确、更安全、更适合多账号用户。
 
 ## 解决什么问题
 
-很多浏览器自动化工具默认会开一个干净浏览器，这会导致：
+如果没有明确的 profile 选择流程，浏览器自动化很容易遇到这些问题：
 
 - 登录态没有了
 - 账号 profile 用错了
 - 多个 Chrome profile 之间容易串
 - 自动化脚本看起来能跑，但实际不是用户正在使用的浏览器环境
-
-`safeclaw-browser-use` 的目标是让 agent 使用用户真实 Chrome 环境，并且在接管之前先确认 profile。
 
 ## 主要特点
 
@@ -117,4 +153,3 @@ safeclaw-browser-use-darwin-arm64-win32-x64.tar.gz
 - 转售、二次打包或作为商业交付的一部分
 
 详见 [`LICENSE`](LICENSE)。
-
