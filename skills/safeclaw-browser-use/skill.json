@@ -1,0 +1,22 @@
+{
+  "id": "safeclaw-browser-use",
+  "name": "浏览器自动化",
+  "description": "SafeClaw 浏览器自动化入口：内置 Browser Harness macOS arm64 与 Windows x64 运行时，可在白环境直接接管真实 Chrome，适合需要复用登录态、截图、点击和页面调试的浏览器任务。Browser Use CLI 不作为默认回退。",
+  "source": "local",
+  "internalSkillRef": "safeclaw-browser-use",
+  "version": "0.13.0",
+  "dependencies": [
+    "browser-harness"
+  ],
+  "healthCheckSpec": {
+    "requiredFiles": [
+      "SKILL.md",
+      "scripts/browser-harness",
+      "scripts/browser-harness.cmd",
+      "runtime/darwin-arm64/python/bin/python3",
+      "runtime/darwin-arm64/browser-automation/python-packages/browser-harness/browser_harness/run.py",
+      "runtime/win32-x64/python/python.exe",
+      "runtime/win32-x64/browser-automation/python-packages/browser-harness/browser_harness/run.py"
+    ]
+  }
+}
