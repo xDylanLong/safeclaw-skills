@@ -86,6 +86,34 @@ irm https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/insta
 
 安装后重启 Codex，让 Codex 重新加载 skill。
 
+## 让 agent 帮你安装
+
+如果你正在使用 Codex，可以直接把下面这段话发给 agent：
+
+```text
+请帮我安装 safeclaw-browser-use skill。
+在 macOS 上执行：
+curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash
+安装完成后提醒我重启 Codex。
+```
+
+Windows 可以发：
+
+```text
+请帮我安装 safeclaw-browser-use skill。
+在 PowerShell 中执行：
+irm https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.ps1 | iex
+安装完成后提醒我重启 Codex。
+```
+
+如果你想安装到指定目录，可以让 agent 执行：
+
+```bash
+curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash -s -- --dir ~/.codex/skills
+```
+
+注意：不建议只让 agent 从 GitHub 拉取 `skills/safeclaw-browser-use` 源码目录，因为源码目录只包含 `SKILL.md` 和元信息，不包含完整运行时。正确方式是使用 Release 里的安装脚本，它会下载完整 runtime 包并校验 SHA256。
+
 ## 安装到 SafeClaw
 
 macOS:
@@ -130,6 +158,48 @@ skill 会先做 profile gate：
 2. 展示可用 profile
 3. 让用户选择本次任务要使用哪个 profile
 4. 绑定该 profile 后再执行浏览器自动化
+
+## 功能演示
+
+### 1. 选择 Chrome profile 后打开网页
+
+```text
+使用 safeclaw-browser-use，列出我本机的 Chrome profiles，让我选择一个 profile，然后打开 https://example.com 并截图。
+```
+
+适合展示 profile gate：agent 会先找 profiles，再让用户确认要接管哪个账号环境。
+
+### 2. 复用登录态检查后台页面
+
+```text
+使用 safeclaw-browser-use，接管我的工作 Chrome profile，打开我已经登录的后台页面，截图并告诉我当前页面标题和主要按钮。
+```
+
+适合展示它不是开一个干净浏览器，而是复用真实 Chrome 登录态。
+
+### 3. 多账号场景避免串号
+
+```text
+使用 safeclaw-browser-use，先让我选择 Chrome profile。不要使用默认 profile。选定后打开目标网站，确认页面上当前登录的是哪个账号。
+```
+
+适合展示相比直接 Browser Harness 调用，多了一步明确的用户确认，减少误接管账号。
+
+### 4. 页面操作和验证
+
+```text
+使用 safeclaw-browser-use，打开目标网页，在搜索框输入关键词，点击搜索，等待页面加载，然后截图并总结搜索结果。
+```
+
+适合展示截图、点击、输入、等待加载和结果检查。
+
+### 5. 页面调试和信息提取
+
+```text
+使用 safeclaw-browser-use，打开这个页面，检查当前 URL、页面标题、可点击按钮和主要表单字段，并输出一份简短报告。
+```
+
+适合展示基于真实页面状态的 CDP 检查能力。
 
 ## Release 包
 
