@@ -1,76 +1,38 @@
 # SafeClaw Browser Use Skill
 
-我们是 SnapSnap 团队，正在开发一个 AI 浏览器自动化产品 SafeClaw。
+让 Codex / SafeClaw 接管你真正想用的 Chrome profile，而不是误开一个错误账号或干净浏览器。
 
-在开发过程中，我们大量使用了 [browser-use/browser-harness](https://github.com/browser-use/browser-harness)。它可以接管真实 Chrome，复用登录态，并完成截图、点击、输入和页面检查，是一个非常实用的底层能力。
+我们是 SnapSnap 团队，正在开发 AI 浏览器自动化产品 SafeClaw。开发过程中，我们大量使用了 [browser-use/browser-harness](https://github.com/browser-use/browser-harness)：它能接管真实 Chrome、复用登录态，并完成截图、点击、输入和页面检查。
 
-但我们发现一个实际问题：当用户本机有多个 Chrome profile 时，agent 很容易接管错账号，或者不清楚当前自动化到底运行在哪个 profile 里。
+但在多账号场景里，我们遇到一个很具体的问题：用户本机通常有多个 Chrome profile，agent 如果直接接管浏览器，很容易用错账号，或者不清楚当前任务到底运行在哪个 profile 里。
 
-所以我们做了这个 skill：`safeclaw-browser-use`。
+所以我们做了 `safeclaw-browser-use`：一个基于 Browser Harness 的 Codex / SafeClaw skill，核心增强是 **profile gate**。
 
-它基于 Browser Harness 打包，并强化了 Chrome profile 选择流程。每次执行浏览器任务前，skill 会先识别本机 Chrome profiles，让用户明确选择要接管哪个 profile，然后后续所有浏览器操作都绑定到这个 profile 上。
+每次执行浏览器任务前，它会先识别本机 Chrome profiles，让用户明确选择要接管哪个 profile，然后后续所有操作都绑定到这个 profile 上。
 
-我们把这套能力整理成 Codex / SafeClaw 可安装的 skill，并开放出来给大家免费非商用使用。
+## Setup Prompt
 
-## 它是什么
+把下面这段话发给 Codex，让 agent 帮你安装：
 
-`safeclaw-browser-use` 是一个浏览器自动化 skill，用来让 agent 使用用户真实 Chrome 环境完成网页任务。
+```text
+请帮我安装 safeclaw-browser-use skill。
+在 macOS 上执行：
+curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash
+安装完成后提醒我重启 Codex。
+```
 
-它可以做：
+Windows 用户把这段发给 agent：
 
-- 打开真实 Chrome
-- 复用已登录账号
-- 选择指定 Chrome profile
-- 打开网页
-- 截图
-- 点击、输入、提交表单
-- 检查页面信息
+```text
+请帮我安装 safeclaw-browser-use skill。
+在 PowerShell 中执行：
+irm https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.ps1 | iex
+安装完成后提醒我重启 Codex。
+```
 
-## 相比 Browser Harness 增强了什么
+安装后重启 Codex，让 Codex 重新加载 skill。
 
-Browser Harness 提供的是底层真实浏览器接管能力。
-
-这个 skill 在它之上增加了一层更适合 agent 使用的工作流：
-
-- 启动前先检测本机 Chrome profiles
-- 让用户明确选择目标 profile
-- 后续任务绑定到这个 profile
-- 避免误用默认账号或其他账号
-- 内置 macOS arm64 / Windows x64 运行时，降低安装门槛
-
-核心改进可以概括为一句话：
-
-> Browser Harness 负责接管真实 Chrome；`safeclaw-browser-use` 负责让接管过程更明确、更安全、更适合多账号用户。
-
-## 解决什么问题
-
-如果没有明确的 profile 选择流程，浏览器自动化很容易遇到这些问题：
-
-- 登录态没有了
-- 账号 profile 用错了
-- 多个 Chrome profile 之间容易串
-- 自动化脚本看起来能跑，但实际不是用户正在使用的浏览器环境
-
-## 主要特点
-
-- 基于 Browser Harness 接管真实 Chrome
-- 启动前检测并展示本机 Chrome profiles
-- 要求用户选择目标 profile，避免误用默认账号
-- 支持复用登录态、Cookie、已登录网站
-- 支持截图、点击、输入、页面信息检查
-- 内置 macOS arm64 和 Windows x64 运行时
-- 不要求用户自己配置 Python 环境
-
-## 支持平台
-
-当前 release 包支持：
-
-- macOS arm64
-- Windows x64
-
-Linux 暂未打包。
-
-## 安装到 Codex
+## Direct Install
 
 macOS:
 
@@ -84,51 +46,89 @@ Windows PowerShell:
 irm https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.ps1 | iex
 ```
 
-安装后重启 Codex，让 Codex 重新加载 skill。
-
-## 让 agent 帮你安装
-
-如果你正在使用 Codex，可以直接把下面这段话发给 agent：
-
-```text
-请帮我安装 safeclaw-browser-use skill。
-在 macOS 上执行：
-curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash
-安装完成后提醒我重启 Codex。
-```
-
-Windows 可以发：
-
-```text
-请帮我安装 safeclaw-browser-use skill。
-在 PowerShell 中执行：
-irm https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.ps1 | iex
-安装完成后提醒我重启 Codex。
-```
-
-如果你想安装到指定目录，可以让 agent 执行：
-
-```bash
-curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash -s -- --dir ~/.codex/skills
-```
-
-注意：不建议只让 agent 从 GitHub 拉取 `skills/safeclaw-browser-use` 源码目录，因为源码目录只包含 `SKILL.md` 和元信息，不包含完整运行时。正确方式是使用 Release 里的安装脚本，它会下载完整 runtime 包并校验 SHA256。
-
-## 安装到 SafeClaw
-
-macOS:
+安装到 SafeClaw：
 
 ```bash
 curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash -s -- --target safeclaw
 ```
 
-也可以安装到指定目录：
+安装到指定目录：
 
 ```bash
 curl -fsSL https://github.com/xDylanLong/safeclaw-skills/releases/latest/download/install.sh | bash -s -- --dir ~/.codex/skills
 ```
 
-## 安装后检查
+不要只下载 `skills/safeclaw-browser-use` 源码目录。源码目录只包含 `SKILL.md` 和元信息，不包含完整运行时。请使用 Release 安装脚本，它会下载完整 runtime 包并校验 SHA256。
+
+## Why
+
+很多浏览器自动化工具默认会开一个干净浏览器，或者直接接管默认浏览器。这在真实工作流里经常不够：
+
+- 登录态没有了
+- 工作号和个人号容易串
+- agent 不知道当前接管的是哪个 Chrome profile
+- 多个 Chrome profile 同时存在时，自动化结果不可信
+
+`safeclaw-browser-use` 的目标很简单：让 agent 在接管真实 Chrome 前，先问清楚“这次用哪个 profile”。
+
+## What It Adds
+
+Browser Harness 提供底层真实浏览器接管能力。
+
+`safeclaw-browser-use` 在它之上增加了一层更适合 agent 使用的工作流：
+
+- 启动前读取本机 Chrome profiles
+- 展示 profiles，让用户选择目标 profile
+- 后续任务绑定到这个 profile
+- 避免误用默认账号、个人账号或测试账号
+- 内置 macOS arm64 / Windows x64 运行时
+- 安装脚本自动下载 Release asset、校验 SHA256、解压到 skills 目录
+
+一句话：
+
+> Browser Harness 负责接管真实 Chrome；`safeclaw-browser-use` 负责让接管过程更明确、更安全、更适合多账号用户。
+
+## What You Can Ask It To Do
+
+选择 profile 后打开网页：
+
+```text
+使用 safeclaw-browser-use，列出我本机的 Chrome profiles，让我选择一个 profile，然后打开 https://example.com 并截图。
+```
+
+复用登录态检查后台页面：
+
+```text
+使用 safeclaw-browser-use，接管我的工作 Chrome profile，打开我已经登录的后台页面，截图并告诉我当前页面标题和主要按钮。
+```
+
+避免多账号串号：
+
+```text
+使用 safeclaw-browser-use，先让我选择 Chrome profile。不要使用默认 profile。选定后打开目标网站，确认页面上当前登录的是哪个账号。
+```
+
+执行页面操作：
+
+```text
+使用 safeclaw-browser-use，打开目标网页，在搜索框输入关键词，点击搜索，等待页面加载，然后截图并总结搜索结果。
+```
+
+做页面调试和信息提取：
+
+```text
+使用 safeclaw-browser-use，打开这个页面，检查当前 URL、页面标题、可点击按钮和主要表单字段，并输出一份简短报告。
+```
+
+## How It Works
+
+1. 读取本机 Chrome `Local State`，找出可用 profiles。
+2. 展示 profile 列表，让用户选择本次任务要使用的 profile。
+3. 对选定 profile 运行 Browser Harness doctor 和 CDP 连接检查。
+4. 接管真实 Chrome tab，执行导航、截图、点击、输入和页面检查。
+5. 如果 Chrome 需要远程调试权限，引导用户在目标 profile 中开启。
+
+## Health Check
 
 macOS:
 
@@ -144,64 +144,16 @@ Windows:
 
 如果 doctor 提示需要打开 Chrome 远程调试权限，按照提示在目标 Chrome profile 里开启即可。
 
-## 使用方式
+## Platforms
 
-安装后，在 Codex 里请求浏览器相关任务时，可以明确让它使用这个 skill，例如：
+当前 Release 包支持：
 
-```text
-使用 safeclaw-browser-use 打开我的 Chrome profile，帮我检查这个网页并截图。
-```
+- macOS arm64
+- Windows x64
 
-skill 会先做 profile gate：
+Linux 暂未打包。
 
-1. 读取本机 Chrome profiles
-2. 展示可用 profile
-3. 让用户选择本次任务要使用哪个 profile
-4. 绑定该 profile 后再执行浏览器自动化
-
-## 功能演示
-
-### 1. 选择 Chrome profile 后打开网页
-
-```text
-使用 safeclaw-browser-use，列出我本机的 Chrome profiles，让我选择一个 profile，然后打开 https://example.com 并截图。
-```
-
-适合展示 profile gate：agent 会先找 profiles，再让用户确认要接管哪个账号环境。
-
-### 2. 复用登录态检查后台页面
-
-```text
-使用 safeclaw-browser-use，接管我的工作 Chrome profile，打开我已经登录的后台页面，截图并告诉我当前页面标题和主要按钮。
-```
-
-适合展示它不是开一个干净浏览器，而是复用真实 Chrome 登录态。
-
-### 3. 多账号场景避免串号
-
-```text
-使用 safeclaw-browser-use，先让我选择 Chrome profile。不要使用默认 profile。选定后打开目标网站，确认页面上当前登录的是哪个账号。
-```
-
-适合展示相比直接 Browser Harness 调用，多了一步明确的用户确认，减少误接管账号。
-
-### 4. 页面操作和验证
-
-```text
-使用 safeclaw-browser-use，打开目标网页，在搜索框输入关键词，点击搜索，等待页面加载，然后截图并总结搜索结果。
-```
-
-适合展示截图、点击、输入、等待加载和结果检查。
-
-### 5. 页面调试和信息提取
-
-```text
-使用 safeclaw-browser-use，打开这个页面，检查当前 URL、页面标题、可点击按钮和主要表单字段，并输出一份简短报告。
-```
-
-适合展示基于真实页面状态的 CDP 检查能力。
-
-## Release 包
+## Release Package
 
 完整运行时不直接提交到 git，而是放在 GitHub Release 里：
 
@@ -209,9 +161,15 @@ skill 会先做 profile gate：
 safeclaw-browser-use-darwin-arm64-win32-x64.tar.gz
 ```
 
-安装脚本会自动下载 release asset、校验 SHA256、解压到目标 skills 目录。
+Release asset 包含：
 
-## 许可证
+- `SKILL.md`
+- `skill.json`
+- macOS / Windows launcher
+- macOS arm64 runtime
+- Windows x64 runtime
+
+## License
 
 免费用于个人、学习、研究、评估和其他非商业用途。
 
@@ -223,3 +181,4 @@ safeclaw-browser-use-darwin-arm64-win32-x64.tar.gz
 - 转售、二次打包或作为商业交付的一部分
 
 详见 [`LICENSE`](LICENSE)。
+
